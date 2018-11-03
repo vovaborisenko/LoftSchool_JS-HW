@@ -17,6 +17,21 @@
    isAllTrue([100, 2, 3, 4, 5], n => n < 10) // вернет false
  */
 function isAllTrue(array, fn) {
+    if (!(Array.isArray(array)) || array.length == 0) {
+        throw 'empty array';
+    }
+    if (typeof fn != 'function') {
+        throw 'fn is not a function';
+    }
+    
+    for (var i = 0; i < array.length; i++) {
+        if (!fn(array[i])) {
+
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /*
@@ -36,6 +51,21 @@ function isAllTrue(array, fn) {
    isSomeTrue([1, 2, 3, 4, 5], n => n > 20) // вернет false
  */
 function isSomeTrue(array, fn) {
+    if (!(Array.isArray(array)) || array.length == 0) {
+        throw 'empty array';
+    }
+    if (typeof fn != 'function') {
+        throw 'fn is not a function';
+    }
+
+    for (var i = 0; i < array.length; i++) {
+        if (fn(array[i])) {
+
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /*
@@ -49,7 +79,22 @@ function isSomeTrue(array, fn) {
  3.3: Необходимо выбрасывать исключение в случаях:
    - fn не является функцией (с текстом "fn is not a function")
  */
-function returnBadArguments(fn) {
+function returnBadArguments(fn, ...arg) {
+    var arrayErrorArg = [];
+
+    if (typeof fn != 'function') {
+        throw 'fn is not a function';
+    }
+
+    for (var i = 0; i < arg.length; i++) {
+        try {
+            fn(arg[i]);
+        } catch (e) {
+            arrayErrorArg.push(arg[i]);
+        }
+    }
+
+    return arrayErrorArg;
 }
 
 /*
@@ -69,7 +114,49 @@ function returnBadArguments(fn) {
    - number не является числом (с текстом "number is not a number")
    - какой-либо из аргументов div является нулем (с текстом "division by 0")
  */
-function calculator() {
+function calculator(number = 0) {
+    var obj = {};
+
+    if (isNaN(number)) {
+        throw 'number is not a number';
+    }
+
+    obj = {
+        sum: function(...arg) {
+            for (var i = 0; i < arg.length; i++) {
+                number += arg[i]; 
+            }
+
+            return number;
+        },
+        dif: function(...arg) {
+            for (var i = 0; i < arg.length; i++) {
+                number -= arg[i]; 
+            }
+
+            return number;
+        },
+        div: function(...arg) {
+            for (var i = 0; i < arg.length; i++) {
+                if (arg[i] == 0) {
+                    throw 'division by 0';
+                }
+                
+                number /= arg[i];                 
+            }
+
+            return number;
+        },
+        mul: function(...arg) {
+            for (var i = 0; i < arg.length; i++) {
+                number *= arg[i]; 
+            }
+
+            return number;    
+        }
+    }
+
+    return obj;
 }
 
 /* При решении задач, пострайтесь использовать отладчик */
