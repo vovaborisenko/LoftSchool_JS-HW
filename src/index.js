@@ -125,7 +125,16 @@ function deleteTextNodes(where) {
    должно быть преобразовано в <span><div><b></b></div><p></p></span>
  */
 function deleteTextNodesRecursive(where) {
-    
+    var children = where.childNodes;
+
+    for (var i = 0; i < children.length; i++) {        
+        if (children[i].nodeName == '#text') {
+            where.removeChild(children[i]);
+            i--;
+        } else {
+            deleteTextNodesRecursive(children[i]);
+        }
+    }
 }
 
 /*
@@ -149,6 +158,57 @@ function deleteTextNodesRecursive(where) {
    }
  */
 function collectDOMStat(root) {
+    var obj = {
+            tags: {},
+            classes: {},
+            texts: 0
+        },
+        children = root.childNodes;
+
+    function collectTagsTexts(where) {
+        for (var i = 0; i < where.childNodes.length; i++) {
+            var node = where.childNodes[i],
+                nodeName = node.nodeName;
+
+            if (nodeName == '#text') {
+                obj.texts+=1;    
+            } else {
+                if (!(nodeName in obj.tags)) {
+                    obj.tags[nodeName] = 0;
+                }
+                obj.tags[nodeName]+=1;
+            }
+            
+
+            if (node.hasChildNodes()) {
+                collectTagsTexts(node);
+            }
+        }
+    }
+
+    function collectClasses(where) {
+        for (var i = 0; i < where.children.length; i++) {
+            var tag = where.children[i];
+
+            for (var j = 0; j < tag.classList.length; j++) {
+                var tagClass = tag.classList[j];
+
+                if (!(tagClass in obj.classes)) {
+                    obj.classes[tagClass] = 0;
+                }
+                obj.classes[tagClass]+=1;
+            }
+
+            if (tag.hasChildNodes()) {
+                collectClasses(tag);
+            }            
+        }
+    }
+
+    collectClasses(root);
+    collectTagsTexts(root);
+
+    return obj;
 }
 
 /*
