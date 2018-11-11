@@ -27,6 +27,20 @@ const homeworkContainer = document.querySelector('#homework-container');
    homeworkContainer.appendChild(newDiv);
  */
 function createDiv() {
+    const div = document.createElement('div'),
+        red = (255*Math.random()).toFixed(0),
+        green = (255*Math.random()).toFixed(0),
+        blue = (255*Math.random()).toFixed(0);
+
+    div.style.position = 'absolute';
+    div.style.top = 100*Math.random() + '%';
+    div.style.left = 100*Math.random() + '%';
+    div.style.width = 60*Math.random() + '%';
+    div.style.height = 60*Math.random() + '%';
+    div.style.backgroundColor = `rgb( ${red}, ${green}, ${blue} )`;
+    div.className = 'draggable-div';
+
+    return div;
 }
 
 /*
@@ -37,7 +51,31 @@ function createDiv() {
    homeworkContainer.appendChild(newDiv);
    addListeners(newDiv);
  */
-function addListeners(target) {
+function addListeners(target_this) {    
+
+    target_this.addEventListener('mousedown', event => {
+        let target = target_this,
+            targetTop = target.offsetTop,
+            targetLeft = target.offsetLeft,
+            eventTop = event.offsetY,
+            eventLeft = event.offsetX;
+
+        target.style.zIndex = '2';
+
+        document.addEventListener('mousemove', event => {
+            if (target){
+                target.style.top = event.y - eventTop + 'px';
+                target.style.left = event.x - eventLeft + 'px';                
+            }
+        });
+
+        target.addEventListener('mouseup', event => {
+            if (target) {
+                target.style.zIndex = '';
+                target = null;
+            }
+        }); 
+    });    
 }
 
 let addDivButton = homeworkContainer.querySelector('#addDiv');
