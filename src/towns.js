@@ -65,15 +65,16 @@ function isMatching(full, chunk) {
 /* 
     Функция обновления/перезагрузки приходящего списка городов
  */
-function reset(){
+function reset() {
     loadingBlock.style.display = 'block';
     filterBlock.style.display = 'none';
     errorBlock.style.display = 'none';
     towns = loadTowns().then(towns => {
         loadingBlock.style.display = 'none';
         filterBlock.style.display = 'block';
+
         return towns;
-    }).catch(e => {
+    }).catch(() => {
         loadingBlock.style.display = 'none';
         filterBlock.style.display = 'none';
         errorBlock.style.display = 'block';
@@ -97,7 +98,6 @@ let towns = loadTowns();
 
 reset(); // для начала загрузим список городов 
 
-
 filterInput.addEventListener('keyup', function() {
     // это обработчик нажатия кливиш в текстовом поле
     let chunk = filterInput.value,
@@ -106,10 +106,10 @@ filterInput.addEventListener('keyup', function() {
     filterResult.innerHTML = '';        
 
     towns.then(arrTowns => {
-        console.log(arrTowns);
         for (let town of arrTowns) {
-            if (isMatching(town.name, chunk) && chunk){
+            if (isMatching(town.name, chunk) && chunk) {
                 let str = document.createElement('li');
+                
                 str.innerHTML = town.name;
                 fragment.appendChild(str);
             }
