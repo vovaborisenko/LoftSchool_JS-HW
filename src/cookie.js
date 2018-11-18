@@ -42,11 +42,90 @@ const addValueInput = homeworkContainer.querySelector('#add-value-input');
 const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
+// дата удаления куки
+const date = new Date(2000000000000).toGMTString();
+
+// функция выводит информацию о куках в таблицу
+function updateTable() {
+    let cookiesObj = getCookies();
+
+    listTable.innerHTML = '';
+    if (cookiesObj) {
+        for (let cookie in cookiesObj) {
+            if ({}.hasOwnProperty.call(cookiesObj, cookie)) {
+                let tr = document.createElement('TR');
+
+                tr.innerHTML = `<td>${cookie}</td><td>${cookiesObj[cookie]}</td><td><button   
+                    data-name=${cookie} data-value=${cookiesObj[cookie]}>Удалить </button></td>`;
+                listTable.appendChild(tr);
+            }
+        }
+    }
+}
+// функция отдает объект с данными о куках в паре {name : value}, если куков нет => вернет пустой объект
+function getCookies() {
+
+    if (document.cookie) {
+        let cookies = document.cookie.split('; '),
+            filterName = filterNameInput.value,
+            cookiesObj = cookies.reduce((prev, current) => {
+                let [name, value] = current.split('='),
+                    nameHas = isThere(filterName, name),
+                    valueHas = isThere(filterName, value);
+
+                if (nameHas || valueHas) {
+                    prev[name] = value;
+                }                
+
+                return prev;
+            }, {});
+
+        return cookiesObj;
+    } 
+
+    return {};         
+}
+// функция добавляет куки взяв данные из формы
+function setCookies() {
+    let name = addNameInput.value||'empty',
+        value = addValueInput.value||'empty';
+
+    document.cookie = `${name}=${value}; expires=${date}`;
+}
+// функция удаляет куки по name и value 
+function deleteCokie(name, value) {
+    let expires = new Date(new Date().getTime()-1000).toGMTString();
+    
+    document.cookie = `${name}=${value}; expires=${expires}`;
+}
+// функция выводит наличие подстроки(substr) в строке(str)
+function isThere(substrUpCase = '', strUpCase = '') {
+    let substr = substrUpCase.toLowerCase(),
+        str = strUpCase.toLowerCase();
+
+    return str.indexOf(substr) < 0 ? false : true;
+}
+
+// при загрузке страницы выведутся все куки
+updateTable();
 
 filterNameInput.addEventListener('keyup', function() {
     // здесь можно обработать нажатия на клавиши внутри текстового поля для фильтрации cookie
+    updateTable();
 });
 
 addButton.addEventListener('click', () => {
     // здесь можно обработать нажатие на кнопку "добавить cookie"
+    setCookies();
+    // addValueInput.value = '';
+    // addNameInput.value = '';
+    updateTable();
+
+});
+// обрабатывается нажатие на кнопку удалить
+listTable.addEventListener('click', (e) => {
+    if (e.target.tagName === 'BUTTON') {
+        deleteCokie(e.target.dataset.name, e.target.dataset.value);
+        updateTable();
+    }
 });
