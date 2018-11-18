@@ -37,6 +37,11 @@ const homeworkContainer = document.querySelector('#homework-container');
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
 function loadTowns() {
+    let promise = fetch('https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json')
+        .then((response)=>response.json())
+        .then(array=>array.sort((a, b) => a.name > b.name ? 1 : -1));
+
+    return promise;
 }
 
 /*
@@ -51,6 +56,28 @@ function loadTowns() {
    isMatching('Moscow', 'Moscov') // false
  */
 function isMatching(full, chunk) {
+    let fullLowerCase = full.toLowerCase(),
+        chunkLowerCase = chunk.toLowerCase();
+
+    return fullLowerCase.indexOf(chunkLowerCase) < 0 ? false : true; 
+}
+
+/* 
+    Функция обновления/перезагрузки приходящего списка городов
+ */
+function reset(){
+    loadingBlock.style.display = 'block';
+    filterBlock.style.display = 'none';
+    errorBlock.style.display = 'none';
+    towns = loadTowns().then(towns => {
+        loadingBlock.style.display = 'none';
+        filterBlock.style.display = 'block';
+        return towns;
+    }).catch(e => {
+        loadingBlock.style.display = 'none';
+        filterBlock.style.display = 'none';
+        errorBlock.style.display = 'block';
+    })
 }
 
 /* Блок с надписью "Загрузка" */
@@ -61,10 +88,38 @@ const filterBlock = homeworkContainer.querySelector('#filter-block');
 const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
+/* Блок с сообщением об ошибкой */
+const errorBlock = homeworkContainer.querySelector('#error-block');
+/* Кнопка перезагрузки списка городов */
+const resetButton = homeworkContainer.querySelector('#reset-button');
+/* Отсортированный список городов */
+let towns = loadTowns();
+
+reset(); // для начала загрузим список городов 
+
 
 filterInput.addEventListener('keyup', function() {
     // это обработчик нажатия кливиш в текстовом поле
+    let chunk = filterInput.value,
+        fragment = document.createDocumentFragment();
+
+    filterResult.innerHTML = '';        
+
+    towns.then(arrTowns => {
+        console.log(arrTowns);
+        for (let town of arrTowns) {
+            if (isMatching(town.name, chunk) && chunk){
+                let str = document.createElement('li');
+                str.innerHTML = town.name;
+                fragment.appendChild(str);
+            }
+        }
+        filterResult.appendChild(fragment);
+    })
+
 });
+
+resetButton.addEventListener('click', reset); // это обработчик нажатия кнопки "Повторить"
 
 export {
     loadTowns,
